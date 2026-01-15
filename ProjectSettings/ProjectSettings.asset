@@ -776,8 +776,8 @@ PlayerSettings:
   editorAssembliesCompatibilityLevel: 1
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: Android Game 3D - Delta
-  metroPackageVersion: 
+  metroPackageName: AndroidGame3D-Delta
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -785,7 +785,7 @@ PlayerSettings:
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: Android Game 3D - Delta
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: Android Game 3D - Delta
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
@@ -853,7 +853,7 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 1
+  activeInputHandler: 2
   windowsGamepadBackendHint: 0
   cloudProjectId: 8f7030ca-efae-4c9f-8225-f1174c2b0ae8
   framebufferDepthMemorylessMode: 0
