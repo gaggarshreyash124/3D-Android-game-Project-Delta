@@ -3,24 +3,38 @@ using Unity.Cinemachine;
 
 public class GameManager : MonoBehaviour
 {
-    public bool InCombat;
-    public CinemachineCamera FollowCam;
-    public CinemachineCamera CombatCam;
-    private CinemachineCamera Activecam;
     public static GameManager instance;
+    [SerializeField] PlayerController player;
+    public CinemachineCamera NewCam;
 
     void Awake()
     {
-        if (instance != null)
+        if(instance == null)
         {
             instance = this;
         }
-    }
-    public void SwitchCam(CinemachineCamera NewCam)
-    {
-        NewCam = Activecam;
-        NewCam.Priority = 10;
-    }
     
+    }
+    void Start()
+    {
+        
+    }
+    void Update()
+    {
+        if (player.playerData.inCombat)
+        {
+            NewCam = CamaraManager.instance.CombatCam;
+            CamaraManager.instance.Switch(NewCam);
+        }
+        else
+        {
+            NewCam = CamaraManager.instance.PlayerFollow;
+            CamaraManager.instance.Switch(NewCam);  
+        }
+    }
+}
 
+public interface IDamagable
+{
+    public void TakeDamage();
 }
