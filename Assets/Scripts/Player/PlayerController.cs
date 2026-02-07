@@ -41,40 +41,36 @@ public class PlayerController : MonoBehaviour
     {
         HandleDrag();
         SpeedControl();
+        SetTarget();
         if (inputHandler.InteractInput)
         {
-            Transform Target = CombatManager.instance.Enemy1Pos;
-            StartCoroutine(CombatManager.instance.OnPlayerAttack(rb,Target,2f, playerData.PositionMoveSpeed));
+            StartCoroutine(CombatManager.instance.OnPlayerAttack(rb,2f, playerData.PositionMoveSpeed));
             inputHandler.InteractInput = false;
         }
     }
     void HandleMovement()
     {
         Vector2 input = inputHandler.MoveInput;
+
         if (input.sqrMagnitude < 0.01f) return;
 
-        // Camera-relative directions
         Vector3 camForward = cam.transform.forward;
         Vector3 camRight = cam.transform.right;
 
-        // Remove vertical influence
         camForward.y = 0f;
         camRight.y = 0f;
 
         camForward.Normalize();
         camRight.Normalize();
 
-        // Final movement direction
         Vector3 moveDir = camForward * input.y + camRight * input.x;
 
         if(IsGrounded())
             rb.AddForce(moveDir * playerData.moveSpeed * 10f, ForceMode.Force);
 
-        // in air
         else if(!IsGrounded())
             rb.AddForce(moveDir * playerData.moveSpeed * 10f * playerData.airMultiplier, ForceMode.Force);
 
-        // Rotate player toward movement
         Quaternion targetRotation = Quaternion.LookRotation(moveDir);
         rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, 10f * Time.fixedDeltaTime));
 
@@ -83,7 +79,6 @@ public class PlayerController : MonoBehaviour
     {
         Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
-        // limit velocity if needed
         if(flatVel.magnitude > playerData.moveSpeed)
         {
             Vector3 limitedVel = flatVel.normalized * playerData.moveSpeed;
@@ -95,16 +90,42 @@ public class PlayerController : MonoBehaviour
     {
         rb.linearDamping = IsGrounded() ? playerData.groundDrag : playerData.airDrag;
     }
+
     public bool IsGrounded()
     { 
         return Physics.CheckSphere(GroundCheck.position, .5f, playerData.groundLayer);
     }
 
-    public IEnumerator Rocksmash()
+    public void SpawnRock()
     {
-        yield return null;
+       Instantiate(playerData.Rock,transform.position + transform.forward * 2f, Quaternion.identity);
+    }
+    
+    public void SetTarget()
+    {
+        if (Time.time - playerData.lastTargetSetTime < playerData.targetSetCooldown) return;
+
+        switch (inputHandler.SetTarget)
+        {
+            case Vector2 v when v == Vector2.up:
+                CombatManager.instance.SetCombatTarget(CombatManager.instance.Enemy1Pos);
+                playerData.lastTargetSetTime = Time.time;
+                break;
+
+            case Vector2 v when v == Vector2.down:
+                CombatManager.instance.SetCombatTarget(CombatManager.instance.Enemy2Pos);
+                playerData.lastTargetSetTime = Time.time;
+                break;
+
+            case Vector2 v when v == Vector2.left:
+                CombatManager.instance.SetCombatTarget(CombatManager.instance.Enemy3Pos);
+                playerData.lastTargetSetTime = Time.time;
+                break;
+
+            case Vector2 v when v == Vector2.right:
+                CombatManager.instance.SetCombatTarget(CombatManager.instance.Enemy4Pos);
+                playerData.lastTargetSetTime = Time.time;
+                break;
+        }
     }
 }
-
-
-

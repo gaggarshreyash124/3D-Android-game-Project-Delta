@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,11 +13,12 @@ public class PlayerInputHandler : MonoBehaviour
 
     //Attack Inputs
 
-    public bool Attack1;
-    public bool Attack2;
-    public bool Attack3;
-    public bool Attack4;
+    public bool Attack1 {get; private set;}
+    public bool Attack2 {get; private set;}
+    public bool Attack3 {get; private set;}
+    public bool Attack4 {get; private set;}
 
+    [SerializeField]public Vector2 SetTarget;
     private void Awake()
     {
         inputActions = new InputSystem_Actions();
@@ -33,22 +35,8 @@ public class PlayerInputHandler : MonoBehaviour
     void Update()
     {
         inputActions.Player.CursourSwitch.performed += ctx => PauseInput = !PauseInput;
+
         inputActions.Player.Interact.performed += ctx => InteractInput = true;
-
-        //Attacks
-        inputActions.Player.Attack1.performed += ctx  => Attack1 = true;
-        inputActions.Player.Attack1.canceled += ctx  => Attack1 = false;
-
-        inputActions.Player.Attack2.performed += ctx  => Attack2 = true;
-        inputActions.Player.Attack2.canceled += ctx  => Attack2 = false;
-
-        inputActions.Player.Attack3.performed += ctx  => Attack3 = true;
-        inputActions.Player.Attack3.canceled += ctx  => Attack3 = false;
-        
-        inputActions.Player.Attack4.performed += ctx  => Attack4 = true;
-        inputActions.Player.Attack4.canceled += ctx  => Attack4 = false;
-        
-
     }
 
     public void onMoveInput(InputAction.CallbackContext context)
@@ -79,6 +67,61 @@ public class PlayerInputHandler : MonoBehaviour
         if (context.performed)
         {
             lookInput = context.ReadValue<Vector2>();
+        }
+    }
+    public void OnAttack1(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            Attack1 = true;
+        }
+        else if (context.canceled)
+        {
+            Attack1 = false;
+        }
+    }
+    public void OnAttack2(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            Attack2 = true;
+        }
+        else if (context.canceled)
+        {
+            Attack2 = false;
+        }
+    }
+    public void OnAttack3(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            Attack3 = true;
+        }
+        else if (context.canceled)
+        {
+            Attack3 = false;
+        }
+    }
+    public void OnAttack4(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            Attack4 = true;
+        }
+        else if (context.canceled)
+        {
+            Attack4 = false;
+        }
+    }
+    public void OnTargetSelect(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            SetTarget = context.ReadValue<Vector2>();
+        }
+        else if (context.canceled)
+        {
+            SetTarget = Vector2.zero;
         }
     }
 }

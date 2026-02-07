@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PlayerData
   m_EditorClassIdentifier: Assembly-CSharp::PlayerData
   moveSpeed: 50
-  jumpForce: 5
+  jumpForce: 15
   airMultiplier: 0
   groundDrag: 5
   airDrag: 0

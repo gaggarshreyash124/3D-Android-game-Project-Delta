@@ -13,9 +13,10 @@ public class CombatManager : MonoBehaviour
     public Transform Enemy3Pos;
     public Transform Enemy4Pos;
 
-    float CustomTime;
+    Transform Target ;
+    EnemyController enemy = null;
+    bool inCombat = false;
     private int playerCombatPos = -2;
-    bool reached;
 
     void Awake()
     {
@@ -24,10 +25,18 @@ public class CombatManager : MonoBehaviour
             instance = this;
         }
     }
-
-    public IEnumerator OnPlayerAttack(Rigidbody Rb, Transform Target, float DelayTime,float Speed)
+    void Start()
     {
-
+        Target = Enemy1Pos;
+    }
+    public void SetCombatTarget(Transform NewTarget)
+    {
+        Target = NewTarget;
+        Debug.Log("Target Set" + Target.name);
+    }
+    public IEnumerator OnPlayerAttack(Rigidbody Rb, float DelayTime,float Speed)
+    {
+        inCombat = true;
         float ElapsedTime = 0;
 
         while (ElapsedTime < 1)
@@ -36,9 +45,7 @@ public class CombatManager : MonoBehaviour
             ElapsedTime += Time.deltaTime * Speed;
             yield return null;
         }
-
         yield return new WaitForSeconds(DelayTime);
-
         ElapsedTime = 0;
         
         while (ElapsedTime < 1)
@@ -47,11 +54,20 @@ public class CombatManager : MonoBehaviour
             ElapsedTime += Time.deltaTime * Speed;
             yield return null;
         }
+        inCombat = false;
     }
 
     public IEnumerator OnEnemyAttack()
     {
         yield return new WaitForSeconds(2);
         
+    }
+    public void GetEnemyHealthBar(Transform Target)
+    {
+        Collider Hit = Physics.OverlapSphere(Target.position, 0.5f, LayerMask.GetMask("Enemy"))[0];
+        if (Hit != null)
+        {
+            enemy = Hit.GetComponent<EnemyController>();
+        }
     }
 }

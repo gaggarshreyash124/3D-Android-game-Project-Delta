@@ -5,7 +5,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager instance;
     [SerializeField] PlayerController player;
-    public CinemachineCamera NewCam;
+    CinemachineCamera NewCam;
 
     void Awake()
     {
@@ -13,11 +13,6 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
         }
-    
-    }
-    void Start()
-    {
-        
     }
     void Update()
     {
@@ -33,8 +28,7 @@ public class GameManager : MonoBehaviour
         }
     }
 }
-
 public interface IDamagable
 {
-    public void TakeDamage();
+    public void TakeDamage(float damage,int attackcount);
 }
