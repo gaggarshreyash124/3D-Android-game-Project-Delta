@@ -17,9 +17,10 @@ MonoBehaviour:
   airMultiplier: 0
   groundDrag: 5
   airDrag: 0
-  inCombat: 0
+  inCombat: 1
+  targetSetCooldown: 3
+  lastTargetSetTime: 0
   EnterCombat: 1
-  PositionMoveSpeed: 15
   groundLayer:
     serializedVersion: 2
     m_Bits: 8

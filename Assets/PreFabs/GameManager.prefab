@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8582020512078350396}
   - component: {fileID: 402865050670225740}
-  - component: {fileID: 3533917090319899371}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -46,17 +45,3 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   player: {fileID: 0}
---- !u!114 &3533917090319899371
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 604636866567420740}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 267c02cb470b7364ab422334eb6a71ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CamaraManager
-  PlayerFollow: {fileID: 0}
-  CombatCam: {fileID: 0}

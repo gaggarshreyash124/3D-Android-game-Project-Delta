@@ -33,6 +33,37 @@ Transform:
   - {fileID: 8511337219947317596}
   m_Father: {fileID: 2241650802493395384}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1942050296290753475
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 847893701545604558}
+  m_Layer: 0
+  m_Name: AttackPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &847893701545604558
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1942050296290753475}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.7066747, y: 0, z: 0, w: 0.7075386}
+  m_LocalPosition: {x: -0, y: 0, z: 1.093}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 2241650802493395384}
+  m_LocalEulerAnglesHint: {x: 89.93, y: 0, z: 0}
 --- !u!1 &2298908644053263743
 GameObject:
   m_ObjectHideFlags: 0
@@ -179,11 +210,12 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 4.56, z: 13.71}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 7713755180984182298}
   - {fileID: 2259969713233602429}
+  - {fileID: 847893701545604558}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &4289585394252246101
@@ -281,8 +313,11 @@ MonoBehaviour:
   inputHandler: {fileID: 0}
   rb: {fileID: 0}
   playerData: {fileID: 11400000, guid: 931b820c10abfda4580369fdb0fd82bb, type: 2}
+  AttackPoint: {fileID: 0}
   GroundCheck: {fileID: 7713755180984182298}
   cam: {fileID: 0}
+  capsuleRadius: 1
+  capsuleHalfLength: 1.02
 --- !u!114 &2459463003062376351
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -296,10 +331,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInputHandler
   InteractInput: 0
-  Attack1: 0
-  Attack2: 0
-  Attack3: 0
-  Attack4: 0
+  SetTarget: {x: 0, y: 0}
 --- !u!114 &1336805041631966513
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -469,6 +501,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 3eea3f92-78fa-48b2-9d3f-57f138beceb8
     m_ActionName: 'Player/Attack4[/Keyboard/j]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: a2ab1aaf-34ab-4ade-a885-075d1ec4a1db
+    m_ActionName: 'Player/TargetSelect[/Keyboard/1,/Keyboard/2,/Keyboard/3,/Keyboard/4]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
   m_DefaultActionMap: Player

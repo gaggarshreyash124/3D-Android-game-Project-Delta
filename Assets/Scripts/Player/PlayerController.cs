@@ -1,58 +1,128 @@
-using System.Collections;
-using Unity.Android.Gradle.Manifest;
-using Unity.Cinemachine;
-using Unity.Mathematics;
 using UnityEngine;
+using Unity.Cinemachine;
 
+[RequireComponent(typeof(Rigidbody), typeof(PlayerInputHandler))]
 public class PlayerController : MonoBehaviour
 {
-    public PlayerInputHandler inputHandler;
-    public Rigidbody rb;
+    #region References
+
+    [Header("Core")]
     public PlayerData playerData;
-    public Transform GroundCheck;
-    [Header("Cam Sensitivity")]
-    public CinemachineOrbitalFollow cam;
+    public Transform attackPoint;
+    public Transform groundCheck;
+    public CinemachineCamera cam;
 
+    private PlayerInputHandler inputHandler;
+    private Rigidbody rb;
 
-    void Awake()
+    #endregion
+
+    #region Attack Settings
+
+    [Header("Attack Settings")]
+    [SerializeField] private float capsuleRadius = 0.5f;
+    [SerializeField] private float capsuleHalfLength = 1f;
+
+    private LayerMask enemyLayer;
+
+    #endregion
+
+    #region Initialization
+
+    private void Awake()
     {
         inputHandler = GetComponent<PlayerInputHandler>();
         rb = GetComponent<Rigidbody>();
-    }   
-    void FixedUpdate()
-    {   
+
+        enemyLayer = LayerMask.GetMask("Enemy");
+    }
+
+    private void Start()
+    {
+        // Safety reset
+        if (playerData.inCombat && playerData.EnterCombat <= 1)
+        {
+            playerData.inCombat = false;
+            playerData.EnterCombat = 0;
+        }
+    }
+
+    #endregion
+
+    #region Unity Loops
+
+    private void Update()
+    {
+        HandleCombatInput();
+        HandleTargetSelection();
+    }
+
+    private void FixedUpdate()
+    {
         if (!playerData.inCombat)
-        {
-            
             HandleMovement();
-            if (playerData.EnterCombat != 1)
-            {
-                playerData.EnterCombat = 1;
-            }
-        }
-        else if (playerData.inCombat && playerData.EnterCombat == 1)
+
+        ApplyDrag();
+        LimitSpeed();
+    }
+
+    #endregion
+
+    #region Ground Check
+
+    public bool IsGrounded()
+    {
+        return Physics.CheckSphere(groundCheck.position ,0.5f ,playerData.groundLayer );
+    }
+
+    #endregion
+
+    #region Combat
+
+    private void HandleCombatInput()
+    {
+        if (!inputHandler.InteractInput) return;
+
+        if (playerData.EnterCombat != 0) return;
+
+        if (TryGetEnemy(out GameObject enemy))
         {
-            playerData.EnterCombat -= 1;
-            rb.Move(CombatManager.instance.PlayerPos.position,quaternion.identity);
+            playerData.inCombat = true;
+            playerData.EnterCombat = 1;
+
+            CombatManager.instance.StartCombat(transform, enemy.transform);
         }
+        rb.isKinematic = true;
         
     }
-    void Update()
+
+    public bool TryGetEnemy(out GameObject enemy)
     {
-        HandleDrag();
-        SpeedControl();
-        SetTarget();
-        if (inputHandler.InteractInput)
-        {
-            StartCoroutine(CombatManager.instance.OnPlayerAttack(rb,2f, playerData.PositionMoveSpeed));
-            inputHandler.InteractInput = false;
-        }
+        enemy = null;
+
+        Vector3 forward = attackPoint.forward;
+
+        Vector3 pointA = attackPoint.position + forward * capsuleHalfLength;
+        Vector3 pointB = attackPoint.position - forward * capsuleHalfLength;
+
+        Collider[] hits = Physics.OverlapCapsule( pointA, pointB, capsuleRadius, enemyLayer);
+
+        if (hits.Length == 0) return false;
+
+        enemy = hits[0].gameObject;
+        return true;
     }
-    void HandleMovement()
+
+    #endregion
+
+    #region Movement
+
+    private void HandleMovement()
     {
         Vector2 input = inputHandler.MoveInput;
-
         if (input.sqrMagnitude < 0.01f) return;
+
+        bool grounded = IsGrounded();
 
         Vector3 camForward = cam.transform.forward;
         Vector3 camRight = cam.transform.right;
@@ -65,67 +135,85 @@ public class PlayerController : MonoBehaviour
 
         Vector3 moveDir = camForward * input.y + camRight * input.x;
 
-        if(IsGrounded())
-            rb.AddForce(moveDir * playerData.moveSpeed * 10f, ForceMode.Force);
+        float multiplier = grounded ? 1f : playerData.airMultiplier;
 
-        else if(!IsGrounded())
-            rb.AddForce(moveDir * playerData.moveSpeed * 10f * playerData.airMultiplier, ForceMode.Force);
+        rb.AddForce(moveDir * playerData.moveSpeed * 10f * multiplier, ForceMode.Force);
 
         Quaternion targetRotation = Quaternion.LookRotation(moveDir);
-        rb.MoveRotation(Quaternion.Slerp(rb.rotation, targetRotation, 10f * Time.fixedDeltaTime));
-
+        rb.MoveRotation(
+            Quaternion.Slerp(rb.rotation, targetRotation, 10f * Time.fixedDeltaTime)
+        );
     }
-    private void SpeedControl()
+
+    private void LimitSpeed()
     {
-        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        Vector3 flatVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
 
-        if(flatVel.magnitude > playerData.moveSpeed)
-        {
-            Vector3 limitedVel = flatVel.normalized * playerData.moveSpeed;
-            rb.linearVelocity = new Vector3(limitedVel.x, rb.linearVelocity.y, limitedVel.z);
-        }
+        if (flatVelocity.magnitude <= playerData.moveSpeed) return;
+
+        Vector3 limited = flatVelocity.normalized * playerData.moveSpeed;
+
+        rb.linearVelocity = new Vector3(
+            limited.x,
+            rb.linearVelocity.y,
+            limited.z
+        );
     }
-    
-    void HandleDrag()
+
+    private void ApplyDrag()
     {
-        rb.linearDamping = IsGrounded() ? playerData.groundDrag : playerData.airDrag;
+        rb.linearDamping = IsGrounded()
+            ? playerData.groundDrag
+            : playerData.airDrag;
     }
 
-    public bool IsGrounded()
-    { 
-        return Physics.CheckSphere(GroundCheck.position, .5f, playerData.groundLayer);
-    }
+    #endregion
 
-    public void SpawnRock()
-    {
-       Instantiate(playerData.Rock,transform.position + transform.forward * 2f, Quaternion.identity);
-    }
-    
-    public void SetTarget()
+    #region Target Selection
+
+    private void HandleTargetSelection()
     {
         if (Time.time - playerData.lastTargetSetTime < playerData.targetSetCooldown) return;
 
-        switch (inputHandler.SetTarget)
-        {
-            case Vector2 v when v == Vector2.up:
-                CombatManager.instance.SetCombatTarget(CombatManager.instance.Enemy1Pos);
-                playerData.lastTargetSetTime = Time.time;
-                break;
+        Vector2 input = inputHandler.SetTarget;
 
-            case Vector2 v when v == Vector2.down:
-                CombatManager.instance.SetCombatTarget(CombatManager.instance.Enemy2Pos);
-                playerData.lastTargetSetTime = Time.time;
-                break;
+        if (input == Vector2.up)
+            SetTarget(CombatManager.instance.Enemy1Pos);
 
-            case Vector2 v when v == Vector2.left:
-                CombatManager.instance.SetCombatTarget(CombatManager.instance.Enemy3Pos);
-                playerData.lastTargetSetTime = Time.time;
-                break;
+        else if (input == Vector2.down)
+            SetTarget(CombatManager.instance.Enemy2Pos);
 
-            case Vector2 v when v == Vector2.right:
-                CombatManager.instance.SetCombatTarget(CombatManager.instance.Enemy4Pos);
-                playerData.lastTargetSetTime = Time.time;
-                break;
-        }
+        else if (input == Vector2.left)
+            SetTarget(CombatManager.instance.Enemy3Pos);
+
+        else if (input == Vector2.right)
+            SetTarget(CombatManager.instance.Enemy4Pos);
     }
+
+    private void SetTarget(Transform target)
+    {
+        CombatManager.instance.SetCombatTarget(target);
+        playerData.lastTargetSetTime = Time.time;
+    }
+
+    #endregion
+
+    #region Gizmos
+
+    private void OnDrawGizmos()
+    {
+        if (!attackPoint) return;
+
+        Gizmos.color = Color.red;
+
+        Vector3 forward = attackPoint.forward;
+        Vector3 pointA = attackPoint.position + forward * capsuleHalfLength;
+        Vector3 pointB = attackPoint.position - forward * capsuleHalfLength;
+
+        Gizmos.DrawWireSphere(pointA, capsuleRadius);
+        Gizmos.DrawWireSphere(pointB, capsuleRadius);
+        Gizmos.DrawLine(pointA, pointB);
+    }
+
+    #endregion
 }

@@ -37,6 +37,7 @@ public class PlayerInputHandler : MonoBehaviour
         inputActions.Player.CursourSwitch.performed += ctx => PauseInput = !PauseInput;
 
         inputActions.Player.Interact.performed += ctx => InteractInput = true;
+        inputActions.Player.Interact.canceled += ctx => InteractInput = false;
     }
 
     public void onMoveInput(InputAction.CallbackContext context)

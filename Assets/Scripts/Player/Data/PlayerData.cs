@@ -14,10 +14,10 @@ public class PlayerData : ScriptableObject
 
     [Header("Combat Variables")]
     public bool inCombat;
-    public float EnterCombat;
-    public float PositionMoveSpeed = 5f;
     public float targetSetCooldown = 3f;
     public float lastTargetSetTime = 0;
+    public float EnterCombat = 0;
+
 
     [Header("Check Variables")]
     public LayerMask groundLayer;

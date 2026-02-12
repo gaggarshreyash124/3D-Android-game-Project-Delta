@@ -305,6 +305,10 @@ MonoBehaviour:
   Enemy2Pos: {fileID: 3550600589569948414}
   Enemy3Pos: {fileID: 2093906689870837654}
   Enemy4Pos: {fileID: 9148325277466626383}
+  cuurentpos: {x: 0, y: 0, z: 0}
+  enemypos: {x: 0, y: 0, z: 0}
+  CombatCam: {fileID: 0}
+  Enemies: []
 --- !u!1 &7578108652282224155
 GameObject:
   m_ObjectHideFlags: 0
