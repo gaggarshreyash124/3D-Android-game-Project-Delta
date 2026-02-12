@@ -14,7 +14,7 @@ public class PlayerData : ScriptableObject
 
     [Header("Combat Variables")]
     public bool inCombat;
-    public float targetSetCooldown = 3f;
+    public float targetSetCooldown = 1.5f;
     public float lastTargetSetTime = 0;
     public float EnterCombat = 0;
 

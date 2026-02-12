@@ -1,140 +1,219 @@
 using System.Collections;
-using System.Linq;
-using Unity.Cinemachine;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class CombatManager : MonoBehaviour
 {
-    public static CombatManager instance;
+    #region Singleton
 
-    [Header("Positions")]
-    public Transform PlayerPos;
-    public Transform Enemy1Pos;
-    public Transform Enemy2Pos;
-    public Transform Enemy3Pos;
-    public Transform Enemy4Pos;
-    Transform Target ;
-    EnemyController enemy = null;
-    bool inCombat = false;
-    private int playerCombatPos = -2;
-    public Vector3 cuurentpos;
-    public Vector3 enemypos;
+    public static CombatManager Instance { get; private set; }
 
-    public GameObject[] Enemies;
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+    }
 
-    public States states = States.Player;
+    #endregion
 
-    public bool SelectedEnemy(out EnemyController enemy)
+    #region Inspector References
+
+    [Header("Combat Positions")]
+    public Transform playerPosition;
+    public Transform enemy1Position;
+    public Transform enemy2Position;
+    public Transform enemy3Position;
+    public Transform enemy4Position;
+
+    [Header("Enemy Prefabs")]
+    [SerializeField] private GameObject[] enemyPrefabs;
+
+    #endregion
+
+    #region Runtime State
+
+    private Transform currentTarget;
+    private int playerCombatOffset = -2;
+
+    private readonly Collider[] enemyBuffer = new Collider[5]; // Non-alloc buffer
+    private LayerMask enemyLayer;
+
+    public States CurrentState { get; private set; } = States.Player;
+
+    #endregion
+
+    #region Initialization
+
+    private void Start()
+    {
+        enemyLayer = LayerMask.GetMask("Enemy");
+        currentTarget = enemy1Position;
+
+    }
+
+    #endregion
+
+    #region Unity Loops
+
+    void Update()
+    {
+        CamaraManager.instance.CombatCam.LookAt = currentTarget;
+    }
+    #endregion
+
+    #region Combat Flow
+
+    public void StartCombat(Transform player, Transform selectedEnemy)
+    {
+        player.position = playerPosition.position;
+
+        SpawnEnemies();
+
+        CurrentState = States.Player;
+    }
+
+    private void SpawnEnemies()
+    {
+        if (enemyPrefabs.Length < 2)
+        {
+            Debug.LogError("Not enough enemy prefabs assigned.");
+            return;
+        }
+
+        GameObject[] spawnSet = { enemyPrefabs[0], enemyPrefabs[1], enemyPrefabs[1], enemyPrefabs[0] };
+
+        Transform[] spawnPositions ={ enemy1Position, enemy2Position, enemy3Position, enemy4Position };
+
+        for (int i = 0; i < spawnPositions.Length; i++)
+        {
+            Instantiate(spawnSet[i], spawnPositions[i].position, Quaternion.identity);
+        }
+    }
+
+    #endregion
+
+    #region Targeting
+
+    public void SetCombatTarget(Transform newTarget)
+    {
+        if (newTarget == null) return;
+
+        currentTarget = newTarget;
+        Debug.Log($"Target Set: {currentTarget.name}");
+    }
+
+    public bool TryGetSelectedEnemy(out EnemyController enemy)
     {
         enemy = null;
 
-        Collider[] Hits = Physics.OverlapSphere(Target.position,2f,LayerMask.GetMask("Enemy"));
-
-        if (Hits.Length == 0)
+        if (currentTarget == null)
             return false;
 
-        enemy = Hits[0].GetComponent<EnemyController>();
-        return true;
+        int hitCount = Physics.OverlapSphereNonAlloc( currentTarget.position, 2f, enemyBuffer, enemyLayer);
+
+        if (hitCount == 0)
+            return false;
+
+        enemy = enemyBuffer[0].GetComponent<EnemyController>();
+        return enemy != null;
     }
-    void Awake()
+
+    #endregion
+
+    #region Player Attack
+
+    public IEnumerator PlayerAttackRoutine(Rigidbody rb, float delayTime, float speed)
     {
-        if(instance == null)
+        Vector3 startPos = playerPosition.position;
+        Vector3 attackPos = GetPlayerAttackPosition();
+
+        yield return MoveOverTime(rb, startPos, attackPos, speed);
+
+        yield return new WaitForSeconds(delayTime);
+
+        yield return MoveOverTime(rb, attackPos, startPos, speed);
+    }
+
+    #endregion
+
+    #region Enemy Attack
+
+    public IEnumerator EnemyAttackRoutine(Rigidbody rb, float delayTime, float speed)
+    {
+        Vector3 startPos = currentTarget.position;
+        Vector3 attackPos = GetEnemyAttackPosition();
+
+        yield return MoveOverTime(rb, startPos, attackPos, speed);
+
+        yield return new WaitForSeconds(delayTime);
+
+        yield return MoveOverTime(rb, attackPos, startPos, speed);
+    }
+
+    #endregion
+
+    #region Shared Movement Logic
+
+    private IEnumerator MoveOverTime(Rigidbody rb, Vector3 from, Vector3 to, float speed)
+    {
+        float elapsed = 0f;
+
+        while (elapsed < 1f)
         {
-            instance = this;
-        }
-    }
-
-    void Start()
-    {
-        Target = Enemy1Pos;
-    }
-
-    public void StartCombat(Transform player,Transform Senemy)
-    {
-        player.position = PlayerPos.position;
-
-        GameObject[] spawnPrefabs = { Enemies[0], Enemies[1], Enemies[1], Enemies[0] };
-        Transform[] spawnPositions = { Enemy1Pos, Enemy2Pos, Enemy3Pos, Enemy4Pos };
-
-        // Spawn loop
-        for (int i = 0; i < 4; i++)
-        {
-            Debug.Log("Spawn");
-            Instantiate(spawnPrefabs[i], spawnPositions[i].position, Quaternion.identity);
-        }
-    }
-
-    public void SetCombatTarget(Transform NewTarget)
-    {
-        Target = NewTarget;
-        Debug.Log("Target Set" + Target.name);
-    }
-
-    public IEnumerator OnPlayerAttack(Rigidbody Rb, float DelayTime,float Speed)
-    {
-        float ElapsedTime = 0;
-
-        while (ElapsedTime < 1)
-        {
-            Rb.MovePosition(Vector3.Lerp(PlayerPos.position, new Vector3(Target.position.x,Target.position.y,Target.position.z + playerCombatPos),ElapsedTime));
-            ElapsedTime += Time.deltaTime * Speed;
+            elapsed += Time.deltaTime * speed;
+            rb.MovePosition(Vector3.Lerp(from, to, elapsed));
             yield return null;
         }
 
-        yield return new WaitForSeconds(DelayTime);
-        ElapsedTime = 0;
-        
-        while (ElapsedTime < 1)
-        {
-            Rb.MovePosition(Vector3.Lerp( new Vector3(Target.position.x,Target.position.y,Target.position.z + playerCombatPos),PlayerPos.position,ElapsedTime));
-            ElapsedTime += Time.deltaTime * Speed;
-            yield return null;
-        }
+        rb.MovePosition(to);
     }
 
-    public IEnumerator OnEnemyAttack(Rigidbody Rb, float DelayTime, float Speed)
+    private Vector3 GetPlayerAttackPosition()
     {
-        float ElapsedTime = 0;
-
-        while (ElapsedTime < 1)
-        {
-            Rb.MovePosition(Vector3.Lerp(Target.position, new Vector3(PlayerPos.position.x, PlayerPos.position.y, PlayerPos.position.z + -playerCombatPos), ElapsedTime));
-            ElapsedTime += Time.deltaTime * Speed;
-            yield return null;
-        }
-
-        yield return new WaitForSeconds(DelayTime);
-        ElapsedTime = 0;
-
-        while (ElapsedTime < 1)
-        {
-            Rb.MovePosition(Vector3.Lerp(new Vector3(PlayerPos.position.x, PlayerPos.position.y, PlayerPos.position.z + -playerCombatPos), Target.position, ElapsedTime));
-            ElapsedTime += Time.deltaTime * Speed;
-            yield return null;
-        }
+        return new Vector3( currentTarget.position.x, currentTarget.position.y, currentTarget.position.z + playerCombatOffset);
     }
 
-    public void PlayerTurn()
+    private Vector3 GetEnemyAttackPosition()
     {
-        
+        return new Vector3( playerPosition.position.x, playerPosition.position.y, playerPosition.position.z - playerCombatOffset);
     }
-    public void StateSwitch()
+
+    #endregion
+
+    #region State Machine
+
+    public void SwitchState(States newState)
     {
-        switch(states)
+        CurrentState = newState;
+
+        switch (CurrentState)
         {
             case States.Player:
+                HandlePlayerTurn();
                 break;
+
             case States.Attack:
                 break;
+
             case States.Enemy:
                 break;
         }
     }
+
+    private void HandlePlayerTurn()
+    {
+        // Future expansion
+    }
+
+    #endregion
 }
+
 public enum States
 {
     Player,
     Attack,
-    Enemy,
+    Enemy
 }

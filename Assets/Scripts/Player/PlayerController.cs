@@ -90,7 +90,8 @@ public class PlayerController : MonoBehaviour
             playerData.inCombat = true;
             playerData.EnterCombat = 1;
 
-            CombatManager.instance.StartCombat(transform, enemy.transform);
+            CombatManager.Instance.StartCombat(this.transform, enemy.transform);
+            CamaraManager.instance.Switch(CamaraManager.instance.CombatCam);
         }
         rb.isKinematic = true;
         
@@ -178,21 +179,21 @@ public class PlayerController : MonoBehaviour
         Vector2 input = inputHandler.SetTarget;
 
         if (input == Vector2.up)
-            SetTarget(CombatManager.instance.Enemy1Pos);
+            SetTarget(CombatManager.Instance.enemy1Position);
 
         else if (input == Vector2.down)
-            SetTarget(CombatManager.instance.Enemy2Pos);
+            SetTarget(CombatManager.Instance.enemy2Position);
 
         else if (input == Vector2.left)
-            SetTarget(CombatManager.instance.Enemy3Pos);
+            SetTarget(CombatManager.Instance.enemy3Position);
 
         else if (input == Vector2.right)
-            SetTarget(CombatManager.instance.Enemy4Pos);
+            SetTarget(CombatManager.Instance.enemy4Position);
     }
 
     private void SetTarget(Transform target)
     {
-        CombatManager.instance.SetCombatTarget(target);
+        CombatManager.Instance.SetCombatTarget(target);
         playerData.lastTargetSetTime = Time.time;
     }
 

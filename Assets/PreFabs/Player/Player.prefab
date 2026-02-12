@@ -310,11 +310,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 013e22e12256fdf43bc67f2cf6594460, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  inputHandler: {fileID: 0}
-  rb: {fileID: 0}
   playerData: {fileID: 11400000, guid: 931b820c10abfda4580369fdb0fd82bb, type: 2}
-  AttackPoint: {fileID: 0}
-  GroundCheck: {fileID: 7713755180984182298}
+  attackPoint: {fileID: 847893701545604558}
+  groundCheck: {fileID: 7713755180984182298}
   cam: {fileID: 0}
   capsuleRadius: 1
   capsuleHalfLength: 1.02
@@ -486,23 +484,83 @@ MonoBehaviour:
     m_ActionId: f9b5c268-beff-4be2-8b21-ad7cdd48fda5
     m_ActionName: 'Player/CursourSwitch[/Keyboard/tab]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2459463003062376351}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnAttack1
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 38dcab94-5a1b-40d9-8899-587e889691d5
     m_ActionName: 'Player/Attack1[/Keyboard/f]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2459463003062376351}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnAttack2
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: fa43b8c7-da72-4ce6-a275-7debce09bd1b
     m_ActionName: 'Player/Attack2[/Keyboard/g]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2459463003062376351}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnAttack3
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 23192a1d-0790-4563-9054-e07b172761a7
     m_ActionName: 'Player/Attack3[/Keyboard/h]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2459463003062376351}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnAttack4
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 3eea3f92-78fa-48b2-9d3f-57f138beceb8
     m_ActionName: 'Player/Attack4[/Keyboard/j]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 2459463003062376351}
+        m_TargetAssemblyTypeName: PlayerInputHandler, Assembly-CSharp
+        m_MethodName: OnTargetSelect
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: a2ab1aaf-34ab-4ade-a885-075d1ec4a1db
     m_ActionName: 'Player/TargetSelect[/Keyboard/1,/Keyboard/2,/Keyboard/3,/Keyboard/4]'
   m_NeverAutoSwitchControlSchemes: 0
